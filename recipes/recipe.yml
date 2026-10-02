@@ -14,4 +14,5 @@ modules:
   - from-file: updates.yml
   - from-file: login.yml
   - from-file: desktop.yml
+  - from-file: desktop-integration.yml
   - type: signing

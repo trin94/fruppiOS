@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Noctalia doesn't load system-wide config; seed only the missing integration setting.
+config_home="${NOCTALIA_CONFIG_HOME:-${XDG_CONFIG_HOME:-${HOME}/.config}}"
+mkdir -p "${config_home}/noctalia"
+cp --update=none --no-target-directory /usr/share/fruppios/noctalia-defaults.toml \
+    "${config_home}/noctalia/00-fruppios.toml"
