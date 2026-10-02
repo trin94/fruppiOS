@@ -1,7 +1,8 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 # image will be published to ghcr.io/trin94/fruppios
-name: fruppiOS
+# lowercase: the name doubles as a Containerfile stage name, docker buildx rejects mixed case
+name: fruppios
 description: Minimal Fedora Atomic desktop for one person who also administers the machine.
 
 # Fedora's own desktop-less atomic base, major version pinned.
