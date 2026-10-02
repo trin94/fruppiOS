@@ -1,0 +1,9 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/module-v1.json
+# Flatpak stays installed with zero remotes. The flatpak RPM ships a oneshot
+# that adds the Fedora remotes on first boot; masking it also survives a
+# first-boot `systemctl preset-all`.
+type: systemd
+system:
+  masked:
+    - flatpak-add-fedora-repos.service
