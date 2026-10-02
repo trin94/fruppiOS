@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+  - type: dnf
+    install:
+      packages:
+        - niri
+        - xwayland-satellite
+        - noctalia
+        - ptyxis
+      # weak deps of niri that the desktop defaults replace
+      exclude:
+        - alacritty
+        - fuzzel
+        - swaylock
+        - waybar
+  - type: files
+    files:
+      - source: desktop
+        destination: /
+  - type: systemd
+    user:
+      enabled:
+        - noctalia.service

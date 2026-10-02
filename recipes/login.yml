@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+  - type: dnf
+    repos:
+      cleanup: true
+      files:
+        - terra.repo
+    install:
+      packages:
+        - greetd
+        - noctalia-greeter
+  - type: files
+    files:
+      - source: login
+        destination: /
+  - type: systemd
+    system:
+      enabled:
+        - greetd.service
