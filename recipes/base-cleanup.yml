@@ -1,11 +1,10 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/module-v1.json
-# Strip what base-atomic ships that the base system does not want.
 type: dnf
 remove:
   packages:
     - firefox
     - firefox-langpacks
-    # seeds the Flathub remote and the third-party repo opt-in
+    # both seed a Flatpak remote, see ADR-0002
     - fedora-third-party
     - fedora-flathub-remote
