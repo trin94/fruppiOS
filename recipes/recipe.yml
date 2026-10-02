@@ -11,6 +11,7 @@ modules:
   - from-file: base-cleanup.yml
   - from-file: flatpak.yml
   - from-file: nix.yml
+  - from-file: updates.yml
   - from-file: login.yml
   - from-file: desktop.yml
   - type: signing
