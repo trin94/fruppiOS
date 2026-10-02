@@ -1,0 +1,17 @@
+[Unit]
+Description=Persistent Nix store
+# Normal mount ordering precedes local-fs.target, but tmpfiles runs after it.
+DefaultDependencies=no
+Requires=systemd-tmpfiles-setup.service
+After=systemd-tmpfiles-setup.service
+Before=nix-daemon.socket nix-daemon.service umount.target
+Conflicts=umount.target
+
+[Mount]
+What=/var/nix
+Where=/nix
+Type=none
+Options=bind
+
+[Install]
+WantedBy=multi-user.target

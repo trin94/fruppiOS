@@ -10,6 +10,7 @@ image-version: 44
 modules:
   - from-file: base-cleanup.yml
   - from-file: flatpak.yml
+  - from-file: nix.yml
   - from-file: login.yml
   - from-file: desktop.yml
   - type: signing
