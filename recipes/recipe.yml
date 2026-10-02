@@ -1,15 +1,12 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
-# image will be published to ghcr.io/trin94/fruppios
-# lowercase: the name doubles as a Containerfile stage name, docker buildx rejects mixed case
+# lowercase: doubles as a Containerfile stage name, docker buildx rejects mixed case
 name: fruppios
 description: Minimal Fedora Atomic desktop for one person who also administers the machine.
 
-# Fedora's own desktop-less atomic base, major version pinned.
 base-image: quay.io/fedora-ostree-desktops/base-atomic
 image-version: 44
 
-# module configuration, executed in order; one file per concern
 modules:
   - from-file: base-cleanup.yml
   - from-file: flatpak.yml
