@@ -36,6 +36,11 @@ modules:
         - gnome-keyring
         - gnome-keyring-pam
         - gvfs
+        - gvfs-mtp
+        - gvfs-gphoto2
+        - gvfs-smb
+        - gvfs-archive # subpackage merged into gvfs in F45, drop at the bump
+        - gvfs-fuse
         - udisks2
         - brightnessctl
         - kitty
