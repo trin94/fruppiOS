@@ -15,38 +15,43 @@ modules:
         - terra.repo # dnf module reads files/dnf/
     remove:
       packages:
+        # both seed a Flatpak remote, see ADR-0002
+        - fedora-flathub-remote
+        - fedora-third-party
+
         - firefox
         - firefox-langpacks
-        # both seed a Flatpak remote, see ADR-0002
-        - fedora-third-party
-        - fedora-flathub-remote
     install:
       packages:
         - nix
         - nix-daemon
+
         - greetd
         - noctalia-greeter
+
+        - kitty
         - niri
-        - xwayland-satellite
         - noctalia
         - ptyxis
-        - nautilus
-        - xdg-desktop-portal-gnome
-        - xdg-desktop-portal-gtk
+        - xwayland-satellite
+
+        - brightnessctl
+        - ddcutil
         - gnome-keyring
         - gnome-keyring-pam
         - gvfs
-        - gvfs-mtp
-        - gvfs-gphoto2
-        - gvfs-smb
         - gvfs-archive # subpackage merged into gvfs in F45, drop at the bump
         - gvfs-fuse
-        - udisks2
-        - brightnessctl
-        - kitty
+        - gvfs-gphoto2
+        - gvfs-mtp
+        - gvfs-smb
+        - nautilus
         - tuned-ppd
-        - ddcutil
+        - udisks2
+        - xdg-desktop-portal-gnome
+        - xdg-desktop-portal-gtk
         - xdg-user-dirs
+
         - steam-devices
         - udev-joystick-blacklist-rm
       # weak deps of niri that the desktop defaults replace
