@@ -47,6 +47,8 @@ modules:
         - tuned-ppd
         - ddcutil
         - xdg-user-dirs
+        - steam-devices
+        - udev-joystick-blacklist-rm
       # weak deps of niri that the desktop defaults replace
       exclude:
         - alacritty
