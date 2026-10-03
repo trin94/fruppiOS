@@ -8,11 +8,58 @@ base-image: quay.io/fedora-ostree-desktops/base-atomic
 image-version: 44
 
 modules:
-  - from-file: base-cleanup.yml
-  - from-file: flatpak.yml
-  - from-file: nix.yml
-  - from-file: updates.yml
-  - from-file: login.yml
-  - from-file: desktop.yml
-  - from-file: desktop-integration.yml
+  - type: dnf
+    repos:
+      cleanup: true
+      files:
+        - terra.repo # dnf module reads files/dnf/
+    remove:
+      packages:
+        - firefox
+        - firefox-langpacks
+        # both seed a Flatpak remote, see ADR-0002
+        - fedora-third-party
+        - fedora-flathub-remote
+    install:
+      packages:
+        - nix
+        - nix-daemon
+        - greetd
+        - noctalia-greeter
+        - niri
+        - xwayland-satellite
+        - noctalia
+        - ptyxis
+        - nautilus
+        - xdg-desktop-portal-gnome
+        - xdg-desktop-portal-gtk
+        - gnome-keyring
+        - gnome-keyring-pam
+        - gvfs
+        - udisks2
+        - brightnessctl
+      # weak deps of niri that the desktop defaults replace
+      exclude:
+        - alacritty
+        - fuzzel
+        - swaylock
+        - waybar
+  - type: files
+    files:
+      - source: system
+        destination: /
+  - type: systemd
+    system:
+      enabled:
+        - nix.mount
+        - nix-daemon.socket
+        - rpm-ostreed-automatic.timer
+        - greetd.service
+      masked:
+        # disabled is not enough, a first-boot preset-all re-enables it, see ADR-0002
+        - flatpak-add-fedora-repos.service
+        - bootc-fetch-apply-updates.timer
+    user:
+      enabled:
+        - noctalia.service # unit file comes from files/systemd/user/
   - type: signing
