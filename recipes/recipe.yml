@@ -38,6 +38,10 @@ modules:
         - gvfs
         - udisks2
         - brightnessctl
+        - kitty
+        - tuned-ppd
+        - ddcutil
+        - xdg-user-dirs
       # weak deps of niri that the desktop defaults replace
       exclude:
         - alacritty
