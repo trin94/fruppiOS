@@ -4,10 +4,10 @@ A Fedora Atomic desktop image for one person who also administers the machine. F
 
 Two layers:
 
-- **Base system**: what the image ships. Packages, system configuration, enabled units. Replaced wholesale on every update. Every line of it is in `recipes/recipe.yml` and `files/`, nothing comes from a third-party base.
-- **User environment**: what you add after first login. Flatpak remotes and apps, Nix profiles, Home Manager generations, dotfiles. Lives under `/var` and survives updates and rollback.
+- **Base system**: what the image ships. Packages, system configuration, enabled units. Replaced wholesale on every update. Every line of it is in `recipes/recipe.yml` and `files/`. The base is Fedora's own, a few packages come from the Terra repo, Noctalia among them.
+- **User environment**: what you add after first login. Flatpak remotes and apps, Nix profiles, Home Manager generations, shell and app config. Lives under `/var` and survives updates and rollback.
 
-The image ships no browser, no editor, and no shell prompt. Those are user environment.
+The image ships no browser and no prompt framework. Those are user environment.
 
 ## Switch to it
 
@@ -18,15 +18,22 @@ sudo bootc switch ghcr.io/trin94/fruppios:44
 sudo systemctl reboot
 ```
 
-The `44` tag follows Fedora 44 and rebuilds daily. Moving to the next Fedora release is another `bootc switch` to the next tag. No tag moves you across releases on its own.
+That first switch is unverified. The image carries the signing policy and key, so once booted into it, switch again with verification on. Updates then stay verified:
 
-Images are signed with [cosign](https://github.com/sigstore/cosign). Verify with the key in this repo:
+```bash
+sudo bootc switch --enforce-container-sigpolicy ghcr.io/trin94/fruppios:44
+sudo systemctl reboot
+```
+
+CI signs every image with [cosign](https://github.com/sigstore/cosign). To check one by hand:
 
 ```bash
 cosign verify --key cosign.pub ghcr.io/trin94/fruppios:44
 ```
 
-Coming from Silverblue, its `fedora` Flatpak remote stays in `/var`. Remove it with `sudo flatpak remote-delete --system fedora`. The image never adds a remote back.
+The `44` tag follows Fedora 44 and rebuilds daily. Stay on it. `latest` follows the recipe and jumps to the next release at the bump. Moving to the next release is another `bootc switch` to the next tag.
+
+Coming from Silverblue, its `fedora` and `fedora-testing` Flatpak remotes stay in `/var`. Remove them with `sudo flatpak remote-delete --system fedora` and the same for `fedora-testing`. The image never adds a remote back.
 
 ## First login
 
@@ -39,11 +46,11 @@ Noctalia Greeter comes up on boot, no autologin. Login lands in niri with the No
 | Super+Alt+L | Lock |
 | Super+Shift+/ | niri hotkey overlay |
 
-The rest of the niri config is the upstream default. Nautilus, the GNOME file chooser and screen share portals, polkit prompts through Noctalia, keyring unlock at login, and lock on suspend work without setup. `~/Documents`, `~/Downloads`, and `~/Pictures` get created on first login.
+The rest of the niri config is the upstream default. Nautilus, the GNOME file chooser and screen share portals, polkit prompts through Noctalia, keyring unlock at login, and lock on suspend work without setup. xdg-user-dirs creates the XDG user directories on first login.
 
 ## Flatpak
 
-Flatpak is installed with no remotes at either scope, and the base system never adds, removes, or updates one. Add your own at user scope:
+Flatpak ships with no remotes at either scope, and the base system never adds, removes, or updates one. Add your own at user scope:
 
 ```bash
 flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -95,10 +102,10 @@ sudo bootc status      # booted, staged, rollback
 sudo bootc rollback    # boot the previous build next time
 ```
 
-Rollback swaps the base system only. Flatpaks, the Nix store, Home Manager generations, and your home stay where they are.
+Rollback swaps the base system only. Flatpaks, the Nix store, Home Manager generations, and your home directory stay where they are. Each deployment keeps its own `/etc`, so a Wi-Fi profile or password change made on the newer build is gone on the older one.
 
 ## Building and testing
 
-`just build` runs the BlueBuild CLI in a container against your podman socket. CI builds on every push and daily at 06:00 UTC, signs the image, and pushes it to GHCR.
+`just build` runs the BlueBuild CLI in a container against your podman socket. CI builds on every code push, on pull requests, and daily at 06:00 UTC, signs the image, and pushes it to GHCR.
 
-Before a host install or a Fedora release bump, run [docs/vm-acceptance.md](docs/vm-acceptance.md) on a VM. Results go to [#8](https://github.com/trin94/fruppiOS/issues/8).
+Before installing on your machine or bumping the Fedora release, run [docs/vm-acceptance.md](docs/vm-acceptance.md) on a VM. Results go to [#8](https://github.com/trin94/fruppiOS/issues/8).
