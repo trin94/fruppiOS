@@ -7,3 +7,4 @@ On a bootc system every toplevel directory except `/etc` and `/var` is part of t
 - OS rollback does not roll back the user environment. Nix profiles, Home Manager generations, and GC roots stay at their current state.
 - `/var/nix` is created by tmpfiles at boot, not by the image, so a fresh install starts with an empty store that the daemon initialises on first use.
 - Moving the store elsewhere later means migrating data; this is why the location is recorded here.
+- SELinux has no policy for `/nix`, so `/var/nix` is `var_t` and the `/nix` view is `default_t`. systemd labels the daemon socket from a file-context lookup on `/nix/var/nix/daemon-socket/socket`, and `init_t` may only create sockets on `var_run_t`. The image adds a file-context rule for both paths at build time, and tmpfiles relabels the directory on boot.
