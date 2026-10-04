@@ -95,7 +95,7 @@ niri reads `~/.config/niri/config.kdl` and falls back to `/etc/niri/config.kdl`.
 
 ## Updates and rollback
 
-`rpm-ostreed-automatic.timer` runs daily with `AutomaticUpdatePolicy=stage`. It downloads the newest `44` build and stages it. Nothing reboots on its own, bootc's apply-and-reboot timer is masked. The staged build takes effect at your next reboot.
+`rpm-ostreed-automatic.timer` runs 10 minutes after boot and then daily with `AutomaticUpdatePolicy=stage`. It downloads the newest `44` build and stages it. Nothing reboots on its own, bootc's apply-and-reboot timer is masked. The staged build takes effect at your next reboot.
 
 ```bash
 sudo bootc status      # booted, staged, rollback

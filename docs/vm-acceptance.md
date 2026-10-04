@@ -55,6 +55,7 @@ ls /etc/yum.repos.d
 grep AutomaticUpdatePolicy /etc/rpm-ostreed.conf
 systemctl is-enabled rpm-ostreed-automatic.timer bootc-fetch-apply-updates.timer
 systemctl is-active rpm-ostreed-automatic.timer
+systemctl list-timers rpm-ostreed-automatic.timer
 systemctl is-active nix.mount nix-daemon.socket
 ls -Z /nix/var/nix/daemon-socket/
 sysctl fs.inotify.max_user_watches fs.inotify.max_user_instances
@@ -63,6 +64,7 @@ sysctl fs.inotify.max_user_watches fs.inotify.max_user_instances
 - [ ] **Switch**: `bootc status` shows build A booted with `signature: containerPolicy`. Write the digest into the table above.
 - [ ] **Fedora**: `rpm -E '%fedora'` prints `44`. `/etc/yum.repos.d` has no `terra.repo`.
 - [ ] **Update policy**: `AutomaticUpdatePolicy=stage`, staging timer `enabled` and `active`, bootc timer `masked`.
+- [ ] **Boot check**: `list-timers` shows the next run about 10 minutes after boot. Once it fired, `systemctl show rpm-ostreed-automatic.service -p Result` is `success` and the boot ID is unchanged.
 - [ ] **Nix socket**: `nix.mount` and `nix-daemon.socket` are `active`. The socket is labeled `var_run_t`.
 - [ ] **inotify**: watches `1048576`, instances `1024`.
 
