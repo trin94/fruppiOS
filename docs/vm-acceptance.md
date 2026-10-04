@@ -2,10 +2,10 @@
 
 Two passes, both by hand, each in one sitting.
 
-- **Fresh pass**, sections 1 to 11: a fresh Silverblue 44 VM switches to the image. Run it before the install on your machine and before any change to login, mounts, or updates. #8 closes on this pass.
+- **Fresh pass**, sections 1 to 11: a fresh Silverblue 44 VM switches to the image. Run it before the install on your machine and before any change to login, mounts, or updates.
 - **Upgrade pass**, section 13: a VM that already runs the image with a populated user environment moves to the next Fedora release. Run it at every major bump, after the new tag passed the fresh pass. The first one comes with the 45 bump.
 
-Every box has to be ticked at the end, except the ones in [Not in the VM](#12-not-in-the-vm). Record the pass in [#8](https://github.com/trin94/fruppiOS/issues/8) with this table and the four `bootc status` dumps.
+Every box has to be ticked at the end, except the ones in [Not in the VM](#12-not-in-the-vm). Record the pass in the issue that asked for it, with this table and the four `bootc status` dumps.
 
 | Record | |
 | --- | --- |
@@ -253,7 +253,7 @@ Reboot, log in as `nix-test`.
 
 ## 11. Record
 
-Attach `build-a.json`, `staged-b.json`, `booted-b.json`, `rollback-a.json` and the output of anything that failed to #8. No secrets or password hashes.
+Attach `build-a.json`, `staged-b.json`, `booted-b.json`, `rollback-a.json` and the output of anything that failed to the issue. No secrets or password hashes.
 
 ## 12. Not in the VM
 
@@ -382,7 +382,7 @@ Each deployment keeps its own `/etc`. Anything written to `/etc` while on 45, a 
 After the reboot, `rpm -E '%fedora'` as **admin**, `bash ~/check.sh` as `nix-test`.
 
 - [ ] **Rolled back**: `44` booted.
-- [ ] **User env**: `check.sh` passes. If only the `nix` lines fail, the old daemon can't read the migrated store database. Record that in #8 as a limit of rollback after a bump, not as a regression.
+- [ ] **User env**: `check.sh` passes. If only the `nix` lines fail, the old daemon can't read the migrated store database. Record that as a limit of rollback after a bump, not as a regression.
 
 Roll forward again, **admin**:
 
@@ -397,7 +397,7 @@ Power the VM off and snapshot it. This snapshot replaces the one from section 7 
 
 ### Record
 
-Attach `upgrade-old.json`, `upgrade-staged.json`, `upgrade-new.json`, `ids-44`, `etc-diff-44`, the `nix --version` output, and the output of anything that failed to #8 with the table above.
+Attach `upgrade-old.json`, `upgrade-staged.json`, `upgrade-new.json`, `ids-44`, `etc-diff-44`, the `nix --version` output, and the output of anything that failed to the issue with the table above.
 
 ## If something fails
 

@@ -104,8 +104,6 @@ sudo bootc rollback    # boot the previous build next time
 
 Rollback swaps the base system only. Flatpaks, the Nix store, Home Manager generations, and your home directory stay where they are. Each deployment keeps its own `/etc`, so a Wi-Fi profile or password change made on the newer build is gone on the older one.
 
-## Building and testing
+## Building
 
 `just build` runs the BlueBuild CLI in a container against your podman socket. CI builds on every code push, on pull requests, and daily at 06:00 UTC, signs the image, and pushes it to GHCR.
-
-Before installing on your machine or bumping the Fedora release, run [docs/vm-acceptance.md](docs/vm-acceptance.md) on a VM. Results go to [#8](https://github.com/trin94/fruppiOS/issues/8).
