@@ -1,0 +1,16 @@
+fruppiOS first steps
+
+Browser and Flathub, user scope:
+  flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+  flatpak install --user flathub org.mozilla.firefox
+
+Your config:
+  niri          cp /etc/niri/config.kdl ~/.config/niri/config.kdl
+  Noctalia      systemctl --user mask noctalia.service, or override the unit
+  Nix           nix shell nixpkgs#hello --command hello
+  Home Manager  nix run github:nix-community/home-manager/release-26.05 -- switch --flake <your flake>
+
+Updates stage daily, reboot to apply. sudo bootc rollback goes back one image.
+More: https://github.com/trin94/fruppiOS
+
+Delete this file when you're done.

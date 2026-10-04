@@ -59,6 +59,10 @@ systemctl list-timers rpm-ostreed-automatic.timer
 systemctl is-active nix.mount nix-daemon.socket
 ls -Z /nix/var/nix/daemon-socket/
 sysctl fs.inotify.max_user_watches fs.inotify.max_user_instances
+systemctl --global is-enabled fruppios-first-steps.service
+stat -c '%a' /usr/share/doc/fruppios/first-steps.txt
+systemctl --user status fruppios-first-steps.service
+ls ~/fruppiOS-first-steps.txt ~/.local/state/fruppios/first-steps
 ```
 
 - [ ] **Switch**: `bootc status` shows build A booted with `signature: containerPolicy`. Write the digest into the table above.
@@ -67,6 +71,7 @@ sysctl fs.inotify.max_user_watches fs.inotify.max_user_instances
 - [ ] **Boot check**: `list-timers` shows the next run about 10 minutes after boot. Once it fired, `systemctl show rpm-ostreed-automatic.service -p Result` is `success` and the boot ID is unchanged.
 - [ ] **Nix socket**: `nix.mount` and `nix-daemon.socket` are `active`. The socket is labeled `var_run_t`.
 - [ ] **inotify**: watches `1048576`, instances `1024`.
+- [ ] **First steps, existing account**: the unit is `enabled`, the file is `644`. `status` shows one successful run, `~/fruppiOS-first-steps.txt` and the marker exist, in the account that did the switch.
 
 ## 2. Session
 
@@ -79,6 +84,8 @@ Log in as `nix-test` through the greeter.
 - [ ] **One Noctalia**: `pgrep -a -u "$(id -u)" -x noctalia` shows one process. No second polkit agent or locker.
 - [ ] **Logout**: after logout, `pgrep -a -u nix-test -x noctalia` (**admin**, other TTY) prints nothing. Login starts it again.
 - [ ] **Mask**: `systemctl --user mask noctalia.service`, relogin, no bar. `systemctl --user unmask noctalia.service`, relogin, bar is back.
+- [ ] **First steps, new account**: `~/fruppiOS-first-steps.txt` and `~/.local/state/fruppios/first-steps` exist, `systemctl --user status fruppios-first-steps.service` shows one successful run.
+- [ ] **First steps, deleted**: `rm ~/fruppiOS-first-steps.txt`, relogin, the file is not back. `status` shows the condition as unmet.
 
 Override the niri config and add a binding:
 

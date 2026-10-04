@@ -81,6 +81,7 @@ modules:
         - flatpak-add-fedora-repos.service
         - bootc-fetch-apply-updates.timer
     user:
-      enabled:
-        - noctalia.service # unit file comes from files/systemd/user/
+      enabled: # unit files come from files/systemd/user/
+        - noctalia.service
+        - fruppios-first-steps.service
   - type: signing

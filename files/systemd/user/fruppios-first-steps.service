@@ -1,0 +1,12 @@
+[Unit]
+Description=Copy fruppiOS first steps into the home directory once
+ConditionPathExists=!%S/fruppios/first-steps
+
+[Service]
+Type=oneshot
+StateDirectory=fruppios
+ExecStart=/usr/bin/cp --no-clobber /usr/share/doc/fruppios/first-steps.txt %h/fruppiOS-first-steps.txt
+ExecStart=/usr/bin/touch %S/fruppios/first-steps
+
+[Install]
+WantedBy=default.target

@@ -35,6 +35,17 @@ The `44` tag follows Fedora 44 and rebuilds daily. Stay on it. `latest` follows 
 
 Coming from Silverblue, its `fedora` and `fedora-testing` Flatpak remotes stay in `/var`. Remove them with `sudo flatpak remote-delete --system fedora` and the same for `fedora-testing`. The image never adds a remote back.
 
+### Before you reboot
+
+The image has no browser, so this README isn't at hand after the switch. The first login of every account puts a copy of these commands into `~/fruppiOS-first-steps.txt`. Delete it when you're done, it stays deleted.
+
+```bash
+flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install --user flathub org.mozilla.firefox
+```
+
+The rest is further down: [niri and Noctalia](#your-own-session), [Nix](#nix), [Home Manager](#home-manager), [updates and rollback](#updates-and-rollback).
+
 ## First login
 
 Noctalia Greeter comes up on boot, no autologin. Login lands in niri with the Noctalia bar.
