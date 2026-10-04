@@ -1,54 +1,106 @@
-# fruppiOS &nbsp; [![bluebuild build badge](https://github.com/trin94/fruppios/actions/workflows/build.yml/badge.svg)](https://github.com/trin94/fruppios/actions/workflows/build.yml)
+# fruppiOS [![bluebuild build badge](https://github.com/trin94/fruppios/actions/workflows/build.yml/badge.svg)](https://github.com/trin94/fruppios/actions/workflows/build.yml)
 
-A Fedora Atomic desktop image for one person who also administers the machine. Fedora's own `base-atomic` plus a niri session with Noctalia, a graphical greeter, a Nix daemon with a persistent store, and Flatpak with no remotes. Updates stage in the background and take effect at the next reboot.
+> [!WARNING]
+> fruppiOS is in very early development. Expect breaking changes.
+> Use it at your own risk.
 
-Two layers:
+## Contents
 
-- **Base system**: what the image ships. Packages, system configuration, enabled units. Replaced wholesale on every update. Every line of it is in `recipes/recipe.yml` and `files/`. The base is Fedora's own, a few packages come from the Terra repo, Noctalia among them.
-- **User environment**: what you add after first login. Flatpak remotes and apps, Nix profiles, Home Manager generations, shell and app config. Lives under `/var` and survives updates and rollback.
+- [Philosophy](#philosophy)
+- [Quickstart](#quickstart)
+- [Pre-installed apps](#pre-installed-apps)
+- [Desktop defaults](#desktop-defaults)
+- [Flatpak](#flatpak)
+- [Nix](#nix)
+- [Your own session](#your-own-session)
+- [Updates and rollback](#updates-and-rollback)
+- [Building](#building)
+- [Possible additions](#possible-additions)
+- [Acknowledgements](#acknowledgements)
 
-The image ships no browser and no prompt framework. Those are user environment.
+## Philosophy
 
-## Switch to it
+fruppiOS is a Fedora Atomic desktop image for one person who runs their
+own machine. The image owns the base system. You own the user environment.
 
-From any Fedora Atomic install, Silverblue for example:
+The image provides a working desktop and manages the base components and
+system configuration. You choose and manage the apps, tools, and personal
+configuration you add. Your user environment survives base system updates
+and rollback.
+
+The desktop stays close to upstream defaults. Use Flatpak for added GUI apps
+and Nix for terminal tools.
+
+**Base system updates stage automatically and take effect when you reboot.
+Flatpak apps don't update automatically.** You manage those separately.
+
+## Quickstart
+
+Start from an existing Fedora Atomic installation, such as Silverblue.
+Keep these steps available during the switch: fruppiOS has no browser until
+you install one.
+
+### 1. Switch to fruppiOS
+
+The first switch is unverified. Your current installation doesn't yet have
+the image's signing policy and key. They arrive with fruppiOS.
 
 ```bash
 sudo bootc switch ghcr.io/trin94/fruppios:44
 sudo systemctl reboot
 ```
 
-That first switch is unverified. The image carries the signing policy and key, so once booted into it, switch again with verification on. Updates then stay verified:
+### 2. Enable image verification
+
+Log in through Noctalia Greeter and press **Super+T** to open Ptyxis.
+Now switch again and enable signature verification. Later base system
+updates stay verified.
 
 ```bash
 sudo bootc switch --enforce-container-sigpolicy ghcr.io/trin94/fruppios:44
 sudo systemctl reboot
 ```
 
-CI signs every image with [cosign](https://github.com/sigstore/cosign). To check one by hand:
+The `44` tag stays on Fedora 44 and gets daily rebuilds. Use it rather than `latest`,
+which moves to the next Fedora release when the recipe changes.
 
-```bash
-cosign verify --key cosign.pub ghcr.io/trin94/fruppios:44
-```
+### 3. Install a browser
 
-The `44` tag follows Fedora 44 and rebuilds daily. Stay on it. `latest` follows the recipe and jumps to the next release at the bump. Moving to the next release is another `bootc switch` to the next tag.
+After the second reboot, log in and open Ptyxis with **Super+T**.
+On first login, each account gets `~/fruppiOS-first-steps.txt`. Run the browser
+installation commands from that file to add Flathub and install Firefox.
 
-Coming from Silverblue, its `fedora` and `fedora-testing` Flatpak remotes stay in `/var`. Remove them with `sudo flatpak remote-delete --system fedora` and the same for `fedora-testing`. The image never adds a remote back.
+Press **Super+D** to open the Noctalia launcher and start Firefox.
+New apps appear without logging out.
 
-### Before you reboot
+The file also has a few setup reminders. Delete it when you're done.
+It stays deleted.
 
-The image has no browser, so this README isn't at hand after the switch. The first login of every account puts a copy of these commands into `~/fruppiOS-first-steps.txt`. Delete it when you're done, it stays deleted.
+If you switched from Silverblue, its existing system Flatpak remotes remain. The
+[Flatpak section](#flatpak) explains how to remove them.
 
-```bash
-flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install --user flathub org.mozilla.firefox
-```
+## Pre-installed apps
 
-The rest is further down: [niri and Noctalia](#your-own-session), [Nix](#nix), [Home Manager](#home-manager), [updates and rollback](#updates-and-rollback).
+The image builds on Fedora's `base-atomic`. Some packages, including Noctalia,
+come from the Terra repository.
 
-## First login
+| App or component | Role |
+| --- | --- |
+| niri | Wayland desktop |
+| Noctalia | Desktop bar, launcher, and lock screen |
+| Noctalia Greeter | Login screen |
+| Ptyxis | Default terminal |
+| Kitty | Alternative terminal |
+| Nautilus | File manager |
+| Flatpak | GUI app manager |
+| Nix | Package manager for terminal tools |
 
-Noctalia Greeter comes up on boot, no autologin. Login lands in niri with the Noctalia bar.
+There's no browser or prompt framework. You choose those yourself.
+
+## Desktop defaults
+
+Noctalia Greeter comes up on boot. There's no autologin. Logging in starts
+niri with the Noctalia bar.
 
 | Keys | Action |
 | --- | --- |
@@ -57,44 +109,76 @@ Noctalia Greeter comes up on boot, no autologin. Login lands in niri with the No
 | Super+Alt+L | Lock |
 | Super+Shift+/ | niri hotkey overlay |
 
-The rest of the niri config is the upstream default. Nautilus, the GNOME file chooser and screen share portals, polkit prompts through Noctalia, keyring unlock at login, and lock on suspend work without setup. xdg-user-dirs creates the XDG user directories on first login.
+The rest of the niri configuration follows the upstream default.
+
+The image sets up the GNOME file chooser and screen-sharing portals.
+It also sets up polkit prompts through Noctalia, keyring unlock at login,
+and lock on suspend. `xdg-user-dirs` creates the standard home directories
+on first login.
 
 ## Flatpak
 
-Flatpak ships with no remotes at either scope, and the base system never adds, removes, or updates one. Add your own at user scope:
+Flatpak is the supported way to install more GUI apps.
+The image ships without remotes. You choose where your apps come from.
+
+Existing remotes and apps survive a switch. If you came from Silverblue,
+remove its Fedora remotes if you don't want them:
 
 ```bash
-flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install --user flathub org.mozilla.firefox
+flatpak remote-delete --system fedora
+flatpak remote-delete --system fedora-testing
 ```
 
-The launcher lists new apps without logging out. No update timer runs, `flatpak update --user` is yours. See [ADR-0002](docs/adr/0002-flatpak-ships-without-remotes.md).
+The image won't add them back or change your chosen remotes.
+
+**Flatpak apps don't update automatically.** Run this yourself:
+
+```bash
+flatpak update -y
+```
 
 ## Nix
 
-Nix runs through the system daemon. Flakes and `nix-command` work on first login in Ptyxis:
+For Nix usage, follow the official
+[First steps guide](https://nix.dev/tutorials/first-steps/).
 
-```bash
-nix shell nixpkgs#hello --command hello
-```
+Nix runs through the system daemon, with flakes and `nix-command` already
+enabled. You don't need a separate installation.
 
-The image doesn't pin `nixpkgs`. Override the registry entry with `nix registry add nixpkgs <flake-reference>` if you want yours.
+The store, database, profiles, and garbage collection roots live under
+`/var/nix`, outside the replaceable base system. The image bind-mounts that
+directory onto `/nix`. Nix sees its usual paths while your tools and profiles
+survive base system updates and rollback.
 
-The store, database, profiles, and GC roots live under `/var/nix`, bind-mounted onto `/nix`. See [ADR-0001](docs/adr/0001-nix-store-bind-mounted-from-var.md).
-
-## Home Manager
-
-Activate your own standalone Home Manager flake as your account, without sudo:
-
-```bash
-nix run github:nix-community/home-manager -- switch --flake /path/to/config#your-configuration
-```
-
-Use the Home Manager branch matching your configuration's nixpkgs release. Open a new terminal after activation to use its CLI tools. `docs/fixtures/home-manager` is a minimal working example.
+You manage profile updates. Base system updates don't update your Nix
+profiles, and rollback doesn't restore older ones. The image doesn't
+pin `nixpkgs`.
 
 ## Your own session
 
-Noctalia runs as the `noctalia.service` user unit, bound to `graphical-session.target`. The base system enables it, you decide what happens to it:
+### niri
+
+niri reads `~/.config/niri/config.kdl` if it exists.
+Otherwise, it reads `/etc/niri/config.kdl`.
+If you don't already have your own file, start with the shipped configuration:
+
+```bash
+mkdir -p ~/.config/niri
+cp /etc/niri/config.kdl ~/.config/niri/config.kdl
+```
+
+Edit the copy. niri reloads it live.
+Once you have a user configuration, changes to the image's default won't
+replace it.
+
+### Noctalia
+
+Noctalia runs as the `noctalia.service` systemd user unit, tied to
+`graphical-session.target`. It starts on graphical login and stops when
+the session ends. Running it as a separate unit lets you turn it off or
+change it without replacing the niri configuration.
+
+The base system enables the unit. You can override that for your account:
 
 ```bash
 systemctl --user mask noctalia.service     # no bar from the next login on
@@ -102,19 +186,102 @@ systemctl --user unmask noctalia.service   # bar is back
 systemctl --user edit noctalia.service     # drop-in under ~/.config/systemd/user/
 ```
 
-niri reads `~/.config/niri/config.kdl` and falls back to `/etc/niri/config.kdl`. Copy the shipped file and edit it, niri reloads it live. Don't spawn `noctalia` from there, that runs a second instance next to the unit. See [ADR-0003](docs/adr/0003-noctalia-runs-as-a-user-unit.md).
+Masking takes effect from the next login. `edit` creates a drop-in under
+`~/.config/systemd/user/`. Don't also start `noctalia` from your niri configuration.
+That starts a second instance alongside the unit.
 
 ## Updates and rollback
 
-`rpm-ostreed-automatic.timer` runs 10 minutes after boot and then daily with `AutomaticUpdatePolicy=stage`. It downloads the newest `44` build and stages it. Nothing reboots on its own, bootc's apply-and-reboot timer is masked. The staged build takes effect at your next reboot.
+### Automatic base system updates
+
+`rpm-ostreed-automatic.timer` runs 10 minutes after boot and then daily, with
+`AutomaticUpdatePolicy=stage`. It downloads the newest build for your
+selected tag and stages it. The staged build takes effect at your next reboot.
+
+Nothing reboots on its own. The image masks bootc's apply-and-reboot timer.
+Automatic updates cover only the base system, not your Flatpak apps
+or Nix profiles.
+
+Check the current deployments:
 
 ```bash
 sudo bootc status      # booted, staged, rollback
-sudo bootc rollback    # boot the previous build next time
 ```
 
-Rollback swaps the base system only. Flatpaks, the Nix store, Home Manager generations, and your home directory stay where they are. Each deployment keeps its own `/etc`, so a Wi-Fi profile or password change made on the newer build is gone on the older one.
+### Rollback
+
+To select the previous base system for the next boot:
+
+```bash
+sudo bootc rollback    # boot the previous build next time
+sudo systemctl reboot
+```
+
+Your home directory and other user data live under `/var`.
+Rollback swaps the base system only. Flatpak apps, the Nix store,
+and your home directory stay as they are.
+It isn't a backup of the user environment.
+
+Each deployment keeps its own `/etc`. If you add a Wi-Fi profile or change
+a password on a newer deployment, rolling back brings back the older
+deployment's settings. Across major releases, a newer Nix daemon may also migrate
+the persistent database to a format an older daemon can't read. Keeping the
+store doesn't guarantee compatibility with every older image.
+
+### Fedora releases and signatures
+
+Stay on a numbered tag such as `44` to stay on that Fedora release.
+`latest` follows the recipe and moves to the next release when the recipe does.
+To upgrade to a new Fedora release, run
+`bootc switch --enforce-container-sigpolicy` with its numbered image tag,
+then reboot.
+
+CI signs published images with [cosign](https://github.com/sigstore/cosign).
+If you have cosign installed, you can also verify an image yourself with
+`cosign.pub` from this repository:
+
+```bash
+cosign verify --key cosign.pub ghcr.io/trin94/fruppios:44
+```
 
 ## Building
 
-`just build` runs the BlueBuild CLI in a container against your podman socket. CI builds on every code push, on pull requests, and daily at 06:00 UTC, signs the image, and pushes it to GHCR.
+From a checkout of this repository, with `just` and Podman installed:
+
+```bash
+just build
+```
+
+This starts your systemd user Podman socket and runs the BlueBuild CLI in
+a container against it. The build uses `recipes/recipe.yml` and the
+configuration under `files/`.
+
+CI builds on code pushes, pull requests, and daily at 06:00 UTC.
+Markdown-only pushes don't trigger a build. CI signs published images
+and pushes them to GHCR.
+
+## Possible additions
+
+I'm open to adding these, but I won't implement them myself.
+Contributions are welcome. Neither is supported today:
+
+- **Homebrew** as another way to install terminal tools.
+- **GUI apps through Nix**, including the desktop integration they need.
+
+## Acknowledgements
+
+fruppiOS mostly pieces together existing projects. The original work here
+is small: an image recipe and a few integration changes.
+
+Thanks to the people behind:
+
+- [Fedora Atomic](https://fedoraproject.org/atomic-desktops/),
+  [bootc](https://bootc.dev/bootc/), and
+  [rpm-ostree](https://coreos.github.io/rpm-ostree/) for the base system
+  and update tools.
+- [BlueBuild](https://blue-build.org/) for the image build tooling.
+- [niri](https://github.com/niri-wm/niri) and
+  [Noctalia](https://noctalia.dev/) for the desktop.
+- [Nix](https://nix.dev/) and [Flatpak](https://flatpak.org/) for the tools
+  to build the user environment.
+- [Terra](https://terrapkg.com/) for the packages it provides.
