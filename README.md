@@ -256,9 +256,21 @@ This starts your systemd user Podman socket and runs the BlueBuild CLI in
 a container against it. The build uses `recipes/recipe.yml` and the
 configuration under `files/`.
 
+To run the checks against a built image:
+
+```bash
+just test localhost/fruppios:latest
+```
+
+Every check runs, even after one fails. A summary at the end lists what
+failed, and the exit code is non-zero. `just build` doesn't run the checks.
+
 CI builds on code pushes, pull requests, and daily at 06:00 UTC.
-Markdown-only pushes don't trigger a build. CI signs published images
-and pushes them to GHCR.
+Markdown-only pushes don't trigger a build. CI runs `just test` against
+every build. Only if every check passes on the default branch does CI push
+the image to GHCR and sign it. It then pulls the published image with the
+image's own signature policy. Pull requests and other branches build and
+test, but don't publish.
 
 ## Possible additions
 
