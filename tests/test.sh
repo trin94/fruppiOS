@@ -170,13 +170,15 @@ boot_no_remotes() {
 }
 
 boot_first_steps_new_account() {
-    local ok=0 file
+    local ok=0 file uid
     for file in fruppiOS-first-steps.txt .local/state/fruppios/first-steps; do
         expect "~${account}/${file}" present "$(as_account test -f "$file" && echo present || echo absent)" || ok=1
     done
-    # every ssh login so far started the user manager again, the unit still ran only once
+    # every ssh login so far started the user manager again, the unit still ran only once.
+    # root's ssh logins start a user manager too, so the unit also runs for root
+    uid=$(in_vm id -u "$account")
     expect "successful runs of fruppios-first-steps.service" 1 "$(in_vm journalctl --boot --output cat \
-        USER_UNIT=fruppios-first-steps.service | grep -c '^Finished ')" || ok=1
+        "_UID=${uid}" USER_UNIT=fruppios-first-steps.service | grep -c '^Finished ')" || ok=1
     return "$ok"
 }
 
@@ -235,7 +237,7 @@ restart_vm() {
         as_account 'nix build --no-link --print-out-paths nixpkgs#hello >nix-hello-path'
     before=$(in_vm cat /proc/sys/kernel/random/boot_id) || return
     # the ssh connection drops with the reboot
-    in_vm systemctl reboot || true
+    in_vm systemctl reboot >/dev/null 2>&1 || true
     # each ssh waits up to a minute for the VM to answer, the boot ID tells the new boot from the old one
     for _ in 1 2 3 4 5; do
         after=$(in_vm cat /proc/sys/kernel/random/boot_id)
