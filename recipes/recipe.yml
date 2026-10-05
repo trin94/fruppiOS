@@ -93,3 +93,7 @@ modules:
         - noctalia.service
         - fruppios-first-steps.service
   - type: signing
+  - type: script
+    snippets:
+      # left behind by dnf, semanage and tuned, bootc container lint rejects content in /run
+      - rm -rf /run/dnf /run/selinux-policy /run/tuned
