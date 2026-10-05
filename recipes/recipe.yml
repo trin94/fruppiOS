@@ -54,6 +54,12 @@ modules:
 
         - steam-devices
         - udev-joystick-blacklist-rm
+
+        # no package pulls these in, but prebuilt binaries outside rpm expect them
+        - fuse-libs # AppImages
+        - libatomic # official Node.js builds
+        - libxcrypt-compat
+        - ncurses-compat-libs
       # weak deps of niri that the desktop defaults replace
       exclude:
         - alacritty
