@@ -6,4 +6,4 @@ Flatpak sources are part of the user environment, so the base system ships the `
 
 - `flatpak remotes` is empty at system and user scope until the desktop owner adds one, which they do at user scope.
 - The unit's marker `/var/lib/flatpak/.fedora-initialized` is never created, so unmasking it later adds the Fedora remotes on the next boot.
-- If Fedora moves remote seeding to another package or unit, the base system picks it up silently. The VM check `flatpak remotes` after a fresh switch is what catches that.
+- If Fedora moves remote seeding to another package or unit, the base system picks it up silently. The CI check `boot_no_remotes`, which runs `flatpak remotes` after the first boot of every build, is what catches that.
