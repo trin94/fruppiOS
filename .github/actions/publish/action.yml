@@ -1,0 +1,26 @@
+name: Publish
+description: Push a tested image to ghcr, sign it, and pull it back under its own signature policy
+inputs:
+  image:
+    description: Image name without a tag, for example ghcr.io/trin94/fruppios
+    required: true
+  tested-image:
+    description: The image tag that passed just test
+    required: true
+  signing-key:
+    description: cosign private key
+    required: true
+  token:
+    description: Token with packages:write on ghcr
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Publish
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        TESTED_IMAGE: ${{ inputs.tested-image }}
+        SIGNING_KEY: ${{ inputs.signing-key }}
+        REGISTRY_TOKEN: ${{ inputs.token }}
+      run: '"${GITHUB_ACTION_PATH}/publish.sh"'

@@ -11,32 +11,52 @@ on:
   pull_request:
   workflow_dispatch: # allow manually triggering builds
 concurrency:
-  # only run one build at a time
+  # only run one build at a time, but never cancel one that may be publishing
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   bluebuild:
-    name: Build Custom Image
-    runs-on: ubuntu-latest
+    name: Build, test and publish
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
-      id-token: write
-    strategy:
-      fail-fast: false # stop GH from cancelling all matrix builds if one fails
-      matrix:
-        recipe:
-          # !! Add your recipes here
-          - recipe.yml
+    defaults:
+      run:
+        shell: bash
+    env:
+      IMAGE: ghcr.io/trin94/fruppios
+      # pull requests and other branches build and test, only the default branch publishes
+      PUBLISH: ${{ github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
     steps:
-      # the build is fully handled by the reusable github action
-      - name: Build Custom Image
+      # BlueBuild leaves every tag in the runner's rootless podman storage
+      - name: Build image
         uses: blue-build/github-action@v1.13
         with:
-          recipe: ${{ matrix.recipe }}
-          cosign_private_key: ${{ secrets.SIGNING_SECRET }}
-          registry_token: ${{ github.token }}
+          recipe: recipe.yml
+          cli_version: v0.9.37
+          push: false
+          build_opts: --build-driver podman --run-driver podman
           pr_event_number: ${{ github.event.number }}
 
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
+
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y just
+
+      - name: Test image
+        id: test
+        run: |
+          tested=$(podman images --format '{{.Repository}}:{{.Tag}}' --filter "reference=${IMAGE}:*_linux_amd64")
+          echo "tested-image=${tested}" >>"$GITHUB_OUTPUT"
+          just test "$tested"
+
+      - name: Publish
+        if: env.PUBLISH == 'true'
+        uses: ./.github/actions/publish
+        with:
+          image: ${{ env.IMAGE }}
+          tested-image: ${{ steps.test.outputs.tested-image }}
+          signing-key: ${{ secrets.SIGNING_SECRET }}
+          token: ${{ github.token }}
