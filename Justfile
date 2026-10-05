@@ -19,3 +19,7 @@ build:
         -e CONTAINER_HOST=unix:///run/podman/podman.sock \
         "{{ bluebuild_image }}" \
         bluebuild build --build-driver podman --run-driver podman "{{ recipe }}"
+
+# Run the checks against a built image, for example localhost/fruppios:latest
+test image:
+    tests/test.sh "{{ image }}"

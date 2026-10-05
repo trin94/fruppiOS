@@ -11,32 +11,107 @@ on:
   pull_request:
   workflow_dispatch: # allow manually triggering builds
 concurrency:
-  # only run one build at a time
+  # only run one build at a time, but never cancel one that may be publishing
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   bluebuild:
-    name: Build Custom Image
-    runs-on: ubuntu-latest
+    name: Build, test and publish
+    # bcvk and libvirt come straight from the archive, 24.04 needs podman and QEMU from newer releases
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       packages: write
-      id-token: write
-    strategy:
-      fail-fast: false # stop GH from cancelling all matrix builds if one fails
-      matrix:
-        recipe:
-          # !! Add your recipes here
-          - recipe.yml
+    defaults:
+      run:
+        shell: bash
+    env:
+      IMAGE: ghcr.io/trin94/fruppios
+      # pull requests and other branches build and test, only the default branch publishes
+      PUBLISH: ${{ github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
     steps:
-      # the build is fully handled by the reusable github action
-      - name: Build Custom Image
+      # KVM for the runner user, libvirt, bcvk and just, the same setup bootc's own CI uses
+      - name: Set up VM host
+        uses: bootc-dev/actions/bootc-host-setup@f77e18eca58220a5f8e82a115d65ee5973fcec83
+        with:
+          libvirt: true
+
+      # BlueBuild leaves every tag in the runner's rootless podman storage
+      - name: Build image
         uses: blue-build/github-action@v1.13
         with:
-          recipe: ${{ matrix.recipe }}
-          cosign_private_key: ${{ secrets.SIGNING_SECRET }}
-          registry_token: ${{ github.token }}
+          recipe: recipe.yml
+          cli_version: v0.9.37
+          push: false
+          build_opts: --build-driver podman --run-driver podman
           pr_event_number: ${{ github.event.number }}
 
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
+
+      # virtiofsd shares the image's storage with the install VM and runs out of file descriptors at the runner's default limit
+      - name: Test image
+        run: |
+          sudo prlimit --pid $$ --nofile=524288:524288
+          tested=$(podman images --format '{{.Repository}}:{{.Tag}}' --filter "reference=${IMAGE}:*_linux_amd64")
+          echo "TESTED_IMAGE=${tested}" >>"$GITHUB_ENV"
+          just test "$tested"
+
+      - name: Log in to ghcr
+        if: env.PUBLISH == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "REGISTRY_AUTH_FILE=${RUNNER_TEMP}/auth.json" >>"$GITHUB_ENV"
+          echo "$GH_TOKEN" | podman login --authfile "${RUNNER_TEMP}/auth.json" ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          echo "$GH_TOKEN" | cosign login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      # the commit tag goes first, nobody tracks it, so no tracked tag points at an unsigned image
+      - name: Push commit tag
+        if: env.PUBLISH == 'true'
+        run: |
+          sha_tag="${IMAGE}:${GITHUB_SHA::7}-"
+          sha_tag=$(podman images --format '{{.Repository}}:{{.Tag}}' --filter "reference=${sha_tag}*")
+          podman manifest push --all --compression-format=gzip \
+            --digestfile "${RUNNER_TEMP}/digest" "$sha_tag" "docker://${sha_tag}"
+          echo "SHA_TAG=${sha_tag}" >>"$GITHUB_ENV"
+          echo "DIGEST=$(<"${RUNNER_TEMP}/digest")" >>"$GITHUB_ENV"
+
+      # legacy signature format, containers/image only reads .sig tags
+      - name: Sign
+        if: env.PUBLISH == 'true'
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          COSIGN_PASSWORD: ""
+          COSIGN_YES: "true"
+        run: |
+          cosign sign --key=env://COSIGN_PRIVATE_KEY \
+            --new-bundle-format=false --use-signing-config=false \
+            --recursive "${IMAGE}@${DIGEST}"
+          cosign verify --key=cosign.pub "${IMAGE}@${DIGEST}"
+
+      - name: Push other tags
+        if: env.PUBLISH == 'true'
+        run: |
+          podman images --format '{{.Repository}}:{{.Tag}}' --filter "reference=${IMAGE}" |
+            while read -r tag; do
+              [[ $tag == "$SHA_TAG" ]] && continue
+              podman manifest exists "$tag" 2>/dev/null || continue
+              skopeo copy --all --preserve-digests "docker://${IMAGE}@${DIGEST}" "docker://${tag}"
+            done
+
+      # the image is already out, a failure here can only turn the run red
+      - name: Pull with the image's signature policy
+        if: env.PUBLISH == 'true'
+        run: |
+          policy="${RUNNER_TEMP}/policy"
+          mkdir -p "$policy"
+          container=$(podman create "$TESTED_IMAGE")
+          podman cp "${container}:/etc/containers/policy.json" "${policy}/policy.json"
+          podman cp "${container}:/etc/containers/registries.d" "${policy}/registries.d"
+          podman cp "${container}:/etc/pki/containers/fruppios.pub" "${policy}/fruppios.pub"
+          podman rm "$container"
+          jq -e --arg repo "$IMAGE" '.transports.docker[$repo][0].type == "sigstoreSigned"' "${policy}/policy.json"
+          sudo install -Dm644 "${policy}/fruppios.pub" /etc/pki/containers/fruppios.pub
+          skopeo --policy "${policy}/policy.json" --registries.d "${policy}/registries.d" \
+            copy "docker://${IMAGE}@${DIGEST}" containers-storage:localhost/fruppios-sigcheck:latest
