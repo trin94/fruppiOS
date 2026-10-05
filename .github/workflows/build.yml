@@ -17,7 +17,8 @@ concurrency:
 jobs:
   bluebuild:
     name: Build, test and publish
-    runs-on: ubuntu-24.04
+    # bcvk and libvirt come straight from the archive, 24.04 needs podman and QEMU from newer releases
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       packages: write
@@ -29,6 +30,12 @@ jobs:
       # pull requests and other branches build and test, only the default branch publishes
       PUBLISH: ${{ github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
     steps:
+      # KVM for the runner user, libvirt, bcvk and just, the same setup bootc's own CI uses
+      - name: Set up VM host
+        uses: bootc-dev/actions/bootc-host-setup@f77e18eca58220a5f8e82a115d65ee5973fcec83
+        with:
+          libvirt: true
+
       # BlueBuild leaves every tag in the runner's rootless podman storage
       - name: Build image
         uses: blue-build/github-action@v1.13
@@ -42,11 +49,10 @@ jobs:
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
 
-      - name: Install just
-        run: sudo apt-get update && sudo apt-get install -y just
-
+      # virtiofsd shares the image's storage with the install VM and runs out of file descriptors at the runner's default limit
       - name: Test image
         run: |
+          sudo prlimit --pid $$ --nofile=524288:524288
           tested=$(podman images --format '{{.Repository}}:{{.Tag}}' --filter "reference=${IMAGE}:*_linux_amd64")
           echo "TESTED_IMAGE=${tested}" >>"$GITHUB_ENV"
           just test "$tested"
