@@ -265,6 +265,14 @@ just test localhost/fruppios:latest
 Every check runs, even after one fails. A summary at the end lists what
 failed, and the exit code is non-zero. `just build` doesn't run the checks.
 
+Some checks boot the image in a VM with
+[bcvk](https://github.com/bootc-dev/bcvk). Without bcvk and libvirt they're
+skipped. To run them, layer these and reboot:
+
+```bash
+rpm-ostree install bcvk libvirt-daemon-kvm libvirt-client
+```
+
 CI builds on code pushes, pull requests, and daily at 06:00 UTC.
 Markdown-only pushes don't trigger a build. CI runs `just test` against
 every build. Only if every check passes on the default branch does CI push
