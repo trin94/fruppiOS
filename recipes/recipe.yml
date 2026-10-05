@@ -69,6 +69,8 @@ modules:
       # systemd labels the socket from the path lookup, and init_t may only create sockets on var_run_t, see ADR-0001
       - semanage fcontext -a -t var_run_t '/nix/var/nix/daemon-socket(/.*)?'
       - semanage fcontext -a -t var_run_t '/var/nix/var/nix/daemon-socket(/.*)?'
+    scripts: # read from files/scripts/
+      - os-release.sh
   - type: systemd
     system:
       enabled:
