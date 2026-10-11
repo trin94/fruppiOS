@@ -76,6 +76,6 @@ hooks = [
         name = "format justfile",
         entry = "just --fmt --justfile",
         language = "system",
-        files = '^Justfile$',
+        files = "^Justfile$",
     },
 ]
