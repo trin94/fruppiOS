@@ -1,17 +1,18 @@
 name: bluebuild
+
 on:
   schedule:
     - cron: "00 06 * * *" # build at 06:00 UTC every day, 20 minutes after the last ublue images start building
   push:
     paths-ignore: # don't rebuild if only documentation has changed
       - "**.md"
-
-  pull_request:
   workflow_dispatch: # allow manually triggering builds
+
 concurrency:
   # only run one build at a time, but never cancel one that may be publishing
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   bluebuild:
     name: Build, test and publish
@@ -24,8 +25,8 @@ jobs:
         shell: bash
     env:
       IMAGE: ghcr.io/trin94/fruppios
-      # pull requests and other branches build and test, only the default branch publishes
-      PUBLISH: ${{ github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+      # other branches build and test, only the default branch publishes
+      PUBLISH: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
     steps:
       # BlueBuild leaves every tag in the runner's rootless podman storage
       - name: Build image
@@ -35,7 +36,6 @@ jobs:
           cli_version: v0.9.37
           push: false
           build_opts: --build-driver podman --run-driver podman
-          pr_event_number: ${{ github.event.number }}
 
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
