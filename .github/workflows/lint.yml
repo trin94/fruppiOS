@@ -1,0 +1,25 @@
+name: lint
+on:
+  push:
+  pull_request:
+  workflow_dispatch: # allow manually triggering the lint
+jobs:
+  lint:
+    name: Format and lint
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: false
+
+      - name: Install just
+        uses: taiki-e/install-action@just
+
+      - name: Format and lint
+        run: just format --show-diff-on-failure

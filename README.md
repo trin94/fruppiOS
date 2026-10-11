@@ -265,6 +265,15 @@ just test localhost/fruppios:latest
 Every check runs, even after one fails. A summary at the end lists what
 failed, and the exit code is non-zero. `just build` doesn't run the checks.
 
+To format and lint the repo, with `uv` and `just` installed:
+
+```bash
+just format
+```
+
+CI runs the same command on every push and pull request, in its own
+workflow. A failing lint doesn't stop publishing.
+
 CI builds on code pushes, pull requests, and daily at 06:00 UTC.
 Markdown-only pushes don't trigger a build. CI runs `just test` against
 every build. Only if every check passes on the default branch does CI push

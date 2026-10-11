@@ -1,3 +1,5 @@
+Run `just format` before committing.
+
 ## Agent skills
 
 ### Issue tracker

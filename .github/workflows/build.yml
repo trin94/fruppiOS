@@ -43,7 +43,7 @@ jobs:
           maximize_build_space: true
 
       - name: Install just
-        run: sudo apt-get update && sudo apt-get install -y just
+        uses: taiki-e/install-action@just
 
       - name: Test image
         id: test
