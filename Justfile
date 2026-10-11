@@ -1,5 +1,8 @@
 bluebuild_image := "ghcr.io/blue-build/cli:v0.9.37"
+prek := "prek@0.5.5"
 recipe := "recipes/recipe.yml"
+
+alias fmt := format
 
 [private]
 default:
@@ -23,3 +26,11 @@ build:
 # Run the checks against a built image, for example localhost/fruppios:latest
 test image:
     tests/test.sh "{{ image }}"
+
+# Format and lint the whole repo with prek
+format *args:
+    uvx {{ prek }} --config .config/prek.toml run --all-files {{ args }}
+
+# Bump the revision of every hook
+update-git-hook-dependencies:
+    uvx {{ prek }} --config .config/prek.toml update
