@@ -1,4 +1,3 @@
----
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 # lowercase: doubles as a Containerfile stage name, docker buildx rejects mixed case
 name: fruppios
