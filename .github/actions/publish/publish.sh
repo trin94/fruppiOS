@@ -61,7 +61,7 @@ pull_with_policy() {
     jq -e --arg repo "$IMAGE" '.transports.docker[$repo][0].type == "sigstoreSigned"' "${policy}/policy.json"
     sudo install -Dm644 "${policy}/fruppios.pub" /etc/pki/containers/fruppios.pub
     skopeo --policy "${policy}/policy.json" --registries.d "${policy}/registries.d" \
-        copy "docker://${IMAGE}@${digest}" containers-storage:localhost/fruppios-sigcheck:latest
+        copy --remove-signatures "docker://${IMAGE}@${digest}" "oci:${RUNNER_TEMP}/sigcheck:latest"
 }
 
 # phase <title> <function>
