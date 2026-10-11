@@ -45,6 +45,30 @@ hooks = [
 ]
 
 [[repos]]
+repo = "https://github.com/tombi-toml/tombi-pre-commit"
+rev = "v1.6.1"
+hooks = [
+    {
+        id = "tombi-format",
+        name = "format toml",
+        args = [
+            "--offline",
+        ]
+    },
+]
+
+[[repos]]
+repo = "https://github.com/google/yamlfmt"
+rev = "v0.21.0"
+hooks = [
+    {
+        id = "yamlfmt",
+        name = "format yml",
+        args = ["-conf", ".config/yamlfmt.yaml"],
+    },
+]
+
+[[repos]]
 repo = "local"
 hooks = [
     {
