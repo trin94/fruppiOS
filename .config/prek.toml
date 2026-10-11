@@ -22,6 +22,17 @@ hooks = [
 ]
 
 [[repos]]
+repo = "https://github.com/scop/pre-commit-shfmt"
+rev = "v3.14.1-1"
+hooks = [
+    {
+        id = "shfmt",
+        name = "format sh",
+        args = ["--write", "--indent=4"],
+    },
+]
+
+[[repos]]
 repo = "https://github.com/rhysd/actionlint"
 rev = "v1.7.12"
 hooks = [
@@ -30,5 +41,17 @@ hooks = [
         name = "lint workflows",
         # shellcheck is on the CI runner but not always local, so turn it off for the same result everywhere
         args = ["-shellcheck="],
+    },
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+    {
+        id = "just-fmt",
+        name = "format justfile",
+        entry = "just --fmt --justfile",
+        language = "system",
+        files = '^Justfile$',
     },
 ]
