@@ -1,3 +1,5 @@
+# Agents
+
 Run `just format` before committing.
 
 ## Agent skills

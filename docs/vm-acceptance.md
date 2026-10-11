@@ -2,10 +2,14 @@
 
 Two passes, both by hand, each in one sitting.
 
-- **Fresh pass**, sections 1 to 11: a fresh Silverblue 44 VM switches to the image. Run it before the install on your machine and before any change to login, mounts, or updates.
-- **Upgrade pass**, section 13: a VM that already runs the image with a populated user environment moves to the next Fedora release. Run it at every major bump, after the new tag passed the fresh pass. The first one comes with the 45 bump.
+- **Fresh pass**, sections 1 to 11: a fresh Silverblue 44 VM switches to the image. Run it before the install on your
+  machine and before any change to login, mounts, or updates.
+- **Upgrade pass**, section 13: a VM that already runs the image with a populated user environment moves to the next
+  Fedora release. Run it at every major bump, after the new tag passed the fresh pass. The first one comes with the 45
+  bump.
 
-Every box has to be ticked at the end, except the ones in [Not in the VM](#12-not-in-the-vm). Record the pass in the issue that asked for it, with this table and the four `bootc status` dumps.
+Every box has to be ticked at the end, except the ones in [Not in the VM](#12-not-in-the-vm). Record the pass in the
+issue that asked for it, with this table and the four `bootc status` dumps.
 
 | Record | |
 | --- | --- |
@@ -20,7 +24,8 @@ Setup:
 - Optional: an SMB share the VM can reach, see section 4.
 - One test account, `nix-test`. The Home Manager fixture expects that name.
 
-Commands marked **admin** run as the account you created in the Silverblue installer. Everything else runs as `nix-test`, which is in `wheel` like the desktop owner's account will be.
+Commands marked **admin** run as the account you created in the Silverblue installer. Everything else runs as
+`nix-test`, which is in `wheel` like the desktop owner's account will be.
 
 ## 1. Switch
 
@@ -60,12 +65,15 @@ systemctl --user status fruppios-first-steps.service
 ls ~/fruppiOS-first-steps.txt ~/.local/state/fruppios/first-steps
 ```
 
-- [ ] **Switch**: `bootc status` shows build A booted with `signature: containerPolicy`. Write the digest into the table above.
+- [ ] **Switch**: `bootc status` shows build A booted with `signature: containerPolicy`. Write the digest into the table
+      above.
 - [ ] **Update policy**: staging timer `enabled` and `active`.
-- [ ] **Boot check**: `list-timers` shows the next run about 10 minutes after boot. Once it fired, `systemctl show rpm-ostreed-automatic.service -p Result` is `success` and the boot ID is unchanged.
+- [ ] **Boot check**: `list-timers` shows the next run about 10 minutes after boot. Once it fired,
+      `systemctl show rpm-ostreed-automatic.service -p Result` is `success` and the boot ID is unchanged.
 - [ ] **Nix socket**: `nix.mount` and `nix-daemon.socket` are `active`. The socket is labeled `var_run_t`.
 - [ ] **inotify**: watches `1048576`, instances `1024`.
-- [ ] **First steps, existing account**: `status` shows one successful run, `~/fruppiOS-first-steps.txt` and the marker exist, in the account that did the switch.
+- [ ] **First steps, existing account**: `status` shows one successful run, `~/fruppiOS-first-steps.txt` and the marker
+      exist, in the account that did the switch.
 
 ## 2. Session
 
@@ -73,13 +81,18 @@ Log in as `nix-test` through the greeter.
 
 - [ ] **Greeter**: shows on boot, no autologin.
 - [ ] **Login**: lands in niri with the Noctalia bar.
-- [ ] **User dirs**: `ls ~/Documents ~/Downloads ~/Pictures` exist. `systemctl --user status xdg-user-dirs.service` shows it ran.
+- [ ] **User dirs**: `ls ~/Documents ~/Downloads ~/Pictures` exist. `systemctl --user status xdg-user-dirs.service`
+      shows it ran.
 - [ ] **Bindings**: Super+T opens Ptyxis, Super+D the launcher, Super+Alt+L locks and the password unlocks.
 - [ ] **One Noctalia**: `pgrep -a -u "$(id -u)" -x noctalia` shows one process. No second polkit agent or locker.
-- [ ] **Logout**: after logout, `pgrep -a -u nix-test -x noctalia` (**admin**, other TTY) prints nothing. Login starts it again.
-- [ ] **Mask**: `systemctl --user mask noctalia.service`, relogin, no bar. `systemctl --user unmask noctalia.service`, relogin, bar is back.
-- [ ] **First steps, new account**: `~/fruppiOS-first-steps.txt` and `~/.local/state/fruppios/first-steps` exist, `systemctl --user status fruppios-first-steps.service` shows one successful run.
-- [ ] **First steps, deleted**: `rm ~/fruppiOS-first-steps.txt`, relogin, the file is not back. `status` shows the condition as unmet.
+- [ ] **Logout**: after logout, `pgrep -a -u nix-test -x noctalia` (**admin**, other TTY) prints nothing. Login starts
+      it again.
+- [ ] **Mask**: `systemctl --user mask noctalia.service`, relogin, no bar. `systemctl --user unmask noctalia.service`,
+      relogin, bar is back.
+- [ ] **First steps, new account**: `~/fruppiOS-first-steps.txt` and `~/.local/state/fruppios/first-steps` exist,
+      `systemctl --user status fruppios-first-steps.service` shows one successful run.
+- [ ] **First steps, deleted**: `rm ~/fruppiOS-first-steps.txt`, relogin, the file is not back. `status` shows the
+      condition as unmet.
 
 Override the niri config and add a binding:
 
@@ -102,8 +115,10 @@ echo "$XDG_DATA_DIRS"
 systemctl --user show-environment | grep '^XDG_DATA_DIRS='
 ```
 
-- [ ] **No remotes**: both `flatpak remotes` calls print nothing. Without `--show-disabled` a disabled `fedora-testing` would hide.
-- [ ] **Data dirs**: `XDG_DATA_DIRS` starts with `~/.local/share/flatpak/exports/share` in the shell and in the user manager.
+- [ ] **No remotes**: both `flatpak remotes` calls print nothing. Without `--show-disabled` a disabled `fedora-testing`
+      would hide.
+- [ ] **Data dirs**: `XDG_DATA_DIRS` starts with `~/.local/share/flatpak/exports/share` in the shell and in the user
+      manager.
 
 Open the launcher once and close it. Then:
 
@@ -119,14 +134,22 @@ Do a calculation and close Calculator, so it has app data.
 ## 4. Desktop
 
 - [ ] **File chooser**: Ctrl+O in Firefox opens the GNOME file chooser, and the selected file opens.
-- [ ] **Screen share**: <https://webrtc.github.io/samples/src/content/getusermedia/getdisplaymedia/> in Firefox shows the niri source picker and a live screen, not a black frame.
+- [ ] **Screen share**: <https://webrtc.github.io/samples/src/content/getusermedia/getdisplaymedia/> in Firefox shows
+      the niri source picker and a live screen, not a black frame.
 - [ ] **Polkit**: `pkexec --disable-internal-agent /usr/bin/id -u` shows one Noctalia prompt and prints `0`.
 - [ ] **Trash**: move a file to Trash in Nautilus and restore it.
 - [ ] **USB**: attach the USB disk, mount it in Nautilus, browse it, eject it.
 - [ ] **Volume**: Noctalia volume and mute change `wpctl get-volume @DEFAULT_AUDIO_SINK@`.
 - [ ] **Network**: Noctalia network controls change `nmcli connection show --active`.
-- [ ] **Brightness**: Noctalia brightness changes `brightnessctl get`. Skip if the VM has no backlight device, then it's host-only.
-- [ ] **Power profile**: switch the profile in Noctalia. `busctl get-property org.freedesktop.UPower.PowerProfiles /org/freedesktop/UPower/PowerProfiles org.freedesktop.UPower.PowerProfiles ActiveProfile` shows the new one and `tuned-adm active` agrees.
+- [ ] **Brightness**: Noctalia brightness changes `brightnessctl get`. Skip if the VM has no backlight device, then it's
+      host-only.
+- [ ] **Power profile**: switch the profile in Noctalia. The command below shows the new one and `tuned-adm active`
+      agrees.
+
+  ```bash
+  busctl get-property org.freedesktop.UPower.PowerProfiles /org/freedesktop/UPower/PowerProfiles \
+      org.freedesktop.UPower.PowerProfiles ActiveProfile
+  ```
 
 Mount an archive through gvfs:
 
@@ -138,12 +161,16 @@ ls "/run/user/$(id -u)/gvfs/"
 ```
 
 - [ ] **Archive**: `ls` shows the archive as a folder and Nautilus lists it in the sidebar.
-- [ ] **Flatpak via FUSE**: Ctrl+O in Firefox, browse to the mount, `hello.txt` opens. `flatpak run --filesystem=xdg-run/gvfs --command=ls org.mozilla.firefox "/run/user/$(id -u)/gvfs/"` lists the mount.
-- [ ] **SMB**: Nautilus, Other Locations, `smb://<host>/<share>` mounts and a file opens. Needs a share the VM can reach. Skip if you have none, then it's host-only.
+- [ ] **Flatpak via FUSE**: Ctrl+O in Firefox, browse to the mount, `hello.txt` opens.
+      `flatpak run --filesystem=xdg-run/gvfs --command=ls org.mozilla.firefox "/run/user/$(id -u)/gvfs/"` lists the
+      mount.
+- [ ] **SMB**: Nautilus, Other Locations, `smb://<host>/<share>` mounts and a file opens. Needs a share the VM can
+      reach. Skip if you have none, then it's host-only.
 
 Power:
 
-- [ ] **Suspend**: `systemctl suspend`, resume lands on the lock screen, the password unlocks it. Same for Noctalia's Lock and Suspend action.
+- [ ] **Suspend**: `systemctl suspend`, resume lands on the lock screen, the password unlocks it. Same for Noctalia's
+      Lock and Suspend action.
 - [ ] **Idle**: no extra idle daemon running, idle settings at Noctalia defaults.
 
 ## 5. Nix
@@ -200,16 +227,19 @@ bash ~/check.sh
 
 Power the VM off, start it, log in as `nix-test`.
 
-- [ ] **Keyring**: no "Unlock Login Keyring" dialog. `secret-tool lookup fruppios-check desktop-integration` prints the fixture without a prompt.
+- [ ] **Keyring**: no "Unlock Login Keyring" dialog. `secret-tool lookup fruppios-check desktop-integration` prints the
+      fixture without a prompt.
 - [ ] **Persistence**: `bash ~/check.sh` passes.
 
-Power the VM off and snapshot it, named after build A's digest. The [upgrade pass](#13-upgrade-pass) starts from this snapshot. Snapshot before 8 to 10, they change state the upgrade pass needs intact.
+Power the VM off and snapshot it, named after build A's digest. The [upgrade pass](#13-upgrade-pass) starts from this
+snapshot. Snapshot before 8 to 10, they change state the upgrade pass needs intact.
 
 ## 8. Staged update
 
-Publish build B from your machine: `gh workflow run build.yml -R trin94/fruppiOS`. Wait for CI. Don't use `bootc upgrade` in the VM.
+Publish build B from your machine: `gh workflow run build.yml -R trin94/fruppiOS`. Wait for CI. Don't use
+`bootc upgrade` in the VM.
 
-**admin**
+**admin**:
 
 ```bash
 cat /proc/sys/kernel/random/boot_id > ~/boot-id
@@ -219,7 +249,8 @@ sudo bootc status --json > ~/staged-b.json
 test "$(cat /proc/sys/kernel/random/boot_id)" = "$(cat ~/boot-id)" && echo same boot
 ```
 
-- [ ] **Staged, no reboot**: result `success`, B's digest staged, A still booted, `same boot` printed. Write B's digest into the table.
+- [ ] **Staged, no reboot**: result `success`, B's digest staged, A still booted, `same boot` printed. Write B's digest
+      into the table.
 
 **admin**: `sudo systemctl reboot`, then `sudo bootc status --json > ~/booted-b.json`.
 
@@ -228,7 +259,7 @@ test "$(cat /proc/sys/kernel/random/boot_id)" = "$(cat ~/boot-id)" && echo same 
 
 ## 9. Rollback
 
-**admin**
+**admin**:
 
 ```bash
 sudo systemctl stop rpm-ostreed-automatic.timer
@@ -252,24 +283,32 @@ flatpak remote-delete --user flathub
 
 Reboot, log in as `nix-test`.
 
-- [ ] **Stays removed**: `flatpak remotes --system --show-disabled` and `flatpak remotes --user --show-disabled` print nothing.
+- [ ] **Stays removed**: `flatpak remotes --system --show-disabled` and `flatpak remotes --user --show-disabled` print
+      nothing.
 
 ## 11. Record
 
-Attach `build-a.json`, `staged-b.json`, `booted-b.json`, `rollback-a.json` and the output of anything that failed to the issue. No secrets or password hashes.
+Attach `build-a.json`, `staged-b.json`, `booted-b.json`, `rollback-a.json` and the output of anything that failed to the
+issue. No secrets or password hashes.
 
 ## 12. Not in the VM
 
-These need hardware the VM doesn't have. They move to [#9](https://github.com/trin94/fruppiOS/issues/9) and run on the installed machine. Also anything you skipped above for the same reason.
+These need hardware the VM doesn't have. They move to [#9](https://github.com/trin94/fruppiOS/issues/9) and run on the
+installed machine. Also anything you skipped above for the same reason.
 
 - [ ] **DDC**: `ddcutil detect` lists the external monitor and Noctalia brightness changes it.
-- [ ] **MTP**: attach a phone in file-transfer mode. Nautilus shows it in the sidebar, `gio mount -l | grep mtp` lists it.
-- [ ] **Controller**: plug in a gamepad after a graphical login. `getfacl /dev/hidraw*` shows the user ACL. Steam (`flatpak install --user flathub com.valvesoftware.Steam`) lists it under Settings, Controller.
-- [ ] **Not a joystick**: plug in a device from the blacklist, a Wacom tablet or Logitech keyboard. `ls /dev/input/js*` shows no node for it and `udevadm info /dev/input/eventN | grep ID_INPUT_JOYSTICK` is empty. **admin**: `sudo ausearch -m avc -c rm` prints nothing.
+- [ ] **MTP**: attach a phone in file-transfer mode. Nautilus shows it in the sidebar, `gio mount -l | grep mtp` lists
+      it.
+- [ ] **Controller**: plug in a gamepad after a graphical login. `getfacl /dev/hidraw*` shows the user ACL. Steam
+      (`flatpak install --user flathub com.valvesoftware.Steam`) lists it under Settings, Controller.
+- [ ] **Not a joystick**: plug in a device from the blacklist, a Wacom tablet or Logitech keyboard. `ls /dev/input/js*`
+      shows no node for it and `udevadm info /dev/input/eventN | grep ID_INPUT_JOYSTICK` is empty. **admin**:
+      `sudo ausearch -m avc -c rm` prints nothing.
 
 ## 13. Upgrade pass
 
-Start from the snapshot taken in section 7: the old release, user environment in place, `check.sh` passing. The new tag has already passed the fresh pass. Replace `44` and `45` with the old and new release.
+Start from the snapshot taken in section 7: the old release, user environment in place, `check.sh` passing. The new tag
+has already passed the fresh pass. Replace `44` and `45` with the old and new release.
 
 | Record | |
 | --- | --- |
@@ -279,9 +318,10 @@ Start from the snapshot taken in section 7: the old release, user environment in
 
 ### Catch up on the old release
 
-The snapshot may be months old. Bring it to the newest build of its release first, so the switch tests the bump and nothing else.
+The snapshot may be months old. Bring it to the newest build of its release first, so the switch tests the bump and
+nothing else.
 
-**admin**
+**admin**:
 
 ```bash
 sudo systemctl start rpm-ostreed-automatic.service
@@ -299,12 +339,13 @@ getent group nixbld >> ~/ids-44
 sudo ostree admin config-diff > ~/etc-diff-44
 ```
 
-- [ ] **Old release current**: staging result `success`, `upgrade --check` finds nothing newer. Write the digest into the table.
+- [ ] **Old release current**: staging result `success`, `upgrade --check` finds nothing newer. Write the digest into
+      the table.
 - [ ] **Baseline holds**: `bash ~/check.sh` passes as `nix-test`.
 
 ### Switch
 
-**admin**
+**admin**:
 
 ```bash
 sudo bootc switch --enforce-container-sigpolicy ghcr.io/trin94/fruppios:45
@@ -328,12 +369,18 @@ sudo find /var/nix -maxdepth 3 \( -nouser -o -nogroup \) | head
 sudo ostree admin config-diff | diff ~/etc-diff-44 -
 ```
 
-- [ ] **Switched**: `45` booted, `bootc status` tracks the `45` tag with `signature: containerPolicy`. Write the digest into the table.
-- [ ] **Base system**: the section 1 checks hold on the new release. Staging timer `enabled` and `active`, `nix.mount` and socket `active`, socket `var_run_t`, inotify `1048576` and `1024`.
+- [ ] **Switched**: `45` booted, `bootc status` tracks the `45` tag with `signature: containerPolicy`. Write the digest
+      into the table.
+- [ ] **Base system**: the section 1 checks hold on the new release. Staging timer `enabled` and `active`, `nix.mount`
+      and socket `active`, socket `var_run_t`, inotify `1048576` and `1024`.
 - [ ] **Clean boot**: `systemctl --failed` lists 0 units, `ausearch` prints `<no matches>`.
-- [ ] **No remotes**: `flatpak remotes` prints nothing. A bump is when Fedora may move remote seeding to another package, see ADR-0002.
-- [ ] **IDs**: the `getent` diff is empty, `find` prints nothing. Dynamic UIDs can come out in a different order on the new image, and `/var/nix` keeps the old numbers. tmpfiles resets the owner of `/var/nix/store` itself on every boot, so `stat` on it proves nothing.
-- [ ] **/etc**: the `config-diff` diff is empty. A new line means a file changed on 44 now shadows a changed default on 45.
+- [ ] **No remotes**: `flatpak remotes` prints nothing. A bump is when Fedora may move remote seeding to another
+      package, see ADR-0002.
+- [ ] **IDs**: the `getent` diff is empty, `find` prints nothing. Dynamic UIDs can come out in a different order on the
+      new image, and `/var/nix` keeps the old numbers. tmpfiles resets the owner of `/var/nix/store` itself on every
+      boot, so `stat` on it proves nothing.
+- [ ] **/etc**: the `config-diff` diff is empty. A new line means a file changed on 44 now shadows a changed default on
+      45.
 
 ### User environment
 
@@ -348,16 +395,18 @@ ls "/run/user/$(id -u)/gvfs/"
 ```
 
 - [ ] **Session**: greeter, niri with the Noctalia bar, Super+T, Super+D, Super+Alt+L, as in section 2.
-- [ ] **Nix**: `check.sh` passes. Note the `nix --version` output. A newer daemon may migrate the store database on first contact, and this is the check that it still reads.
+- [ ] **Nix**: `check.sh` passes. Note the `nix --version` output. A newer daemon may migrate the store database on
+      first contact, and this is the check that it still reads.
 - [ ] **Keyring**: no unlock dialog, lookup prints the fixture.
 - [ ] **Flatpak**: the launcher lists Calculator and starts it. Firefox starts, Ctrl+O shows the GNOME file chooser.
-- [ ] **Archive**: `ls` shows the archive as a folder. The recipe carries a bump note for `gvfs-archive`, this is where it shows.
+- [ ] **Archive**: `ls` shows the archive as a folder. The recipe carries a bump note for `gvfs-archive`, this is where
+      it shows.
 - [ ] **Polkit**: `pkexec --disable-internal-agent /usr/bin/id -u` shows one Noctalia prompt and prints `0`.
 - [ ] **Suspend**: `systemctl suspend`, resume lands on the lock screen, the password unlocks it.
 
 ### Staging follows the new tag
 
-**admin**
+**admin**:
 
 ```bash
 sudo systemctl start rpm-ostreed-automatic.service
@@ -369,7 +418,7 @@ sudo bootc status
 
 ### Rollback across releases
 
-**admin**
+**admin**:
 
 ```bash
 sudo systemctl stop rpm-ostreed-automatic.timer
@@ -377,12 +426,14 @@ sudo bootc rollback
 sudo systemctl reboot
 ```
 
-Each deployment keeps its own `/etc`. Anything written to `/etc` while on 45, a Wi-Fi profile, a changed password, an enabled unit, is gone on 44. Invisible in a wired VM, visible on a laptop.
+Each deployment keeps its own `/etc`. Anything written to `/etc` while on 45, a Wi-Fi profile, a changed password, an
+enabled unit, is gone on 44. Invisible in a wired VM, visible on a laptop.
 
 After the reboot, `rpm -E '%fedora'` as **admin**, `bash ~/check.sh` as `nix-test`.
 
 - [ ] **Rolled back**: `44` booted.
-- [ ] **User env**: `check.sh` passes. If only the `nix` lines fail, the old daemon can't read the migrated store database. Record that as a limit of rollback after a bump, not as a regression.
+- [ ] **User env**: `check.sh` passes. If only the `nix` lines fail, the old daemon can't read the migrated store
+      database. Record that as a limit of rollback after a bump, not as a regression.
 
 Roll forward again, **admin**:
 
@@ -397,7 +448,8 @@ Power the VM off and snapshot it. This snapshot replaces the one from section 7 
 
 ### Record
 
-Attach `upgrade-old.json`, `upgrade-staged.json`, `upgrade-new.json`, `ids-44`, `etc-diff-44`, the `nix --version` output, and the output of anything that failed to the issue with the table above.
+Attach `upgrade-old.json`, `upgrade-staged.json`, `upgrade-new.json`, `ids-44`, `etc-diff-44`, the `nix --version`
+output, and the output of anything that failed to the issue with the table above.
 
 ## If something fails
 
