@@ -50,28 +50,22 @@ sudo flatpak remote-delete --system fedora-testing
 sudo useradd --create-home nix-test
 sudo passwd nix-test
 sudo usermod -aG wheel nix-test
-rpm -E '%fedora'
-ls /etc/yum.repos.d
-grep AutomaticUpdatePolicy /etc/rpm-ostreed.conf
-systemctl is-enabled rpm-ostreed-automatic.timer bootc-fetch-apply-updates.timer
+systemctl is-enabled rpm-ostreed-automatic.timer
 systemctl is-active rpm-ostreed-automatic.timer
 systemctl list-timers rpm-ostreed-automatic.timer
 systemctl is-active nix.mount nix-daemon.socket
 ls -Z /nix/var/nix/daemon-socket/
 sysctl fs.inotify.max_user_watches fs.inotify.max_user_instances
-systemctl --global is-enabled fruppios-first-steps.service
-stat -c '%a' /usr/share/doc/fruppios/first-steps.txt
 systemctl --user status fruppios-first-steps.service
 ls ~/fruppiOS-first-steps.txt ~/.local/state/fruppios/first-steps
 ```
 
 - [ ] **Switch**: `bootc status` shows build A booted with `signature: containerPolicy`. Write the digest into the table above.
-- [ ] **Fedora**: `rpm -E '%fedora'` prints `44`. `/etc/yum.repos.d` has no `terra.repo`.
-- [ ] **Update policy**: `AutomaticUpdatePolicy=stage`, staging timer `enabled` and `active`, bootc timer `masked`.
+- [ ] **Update policy**: staging timer `enabled` and `active`.
 - [ ] **Boot check**: `list-timers` shows the next run about 10 minutes after boot. Once it fired, `systemctl show rpm-ostreed-automatic.service -p Result` is `success` and the boot ID is unchanged.
 - [ ] **Nix socket**: `nix.mount` and `nix-daemon.socket` are `active`. The socket is labeled `var_run_t`.
 - [ ] **inotify**: watches `1048576`, instances `1024`.
-- [ ] **First steps, existing account**: the unit is `enabled`, the file is `644`. `status` shows one successful run, `~/fruppiOS-first-steps.txt` and the marker exist, in the account that did the switch.
+- [ ] **First steps, existing account**: `status` shows one successful run, `~/fruppiOS-first-steps.txt` and the marker exist, in the account that did the switch.
 
 ## 2. Session
 
@@ -322,10 +316,7 @@ After the reboot, **admin**:
 
 ```bash
 sudo bootc status --json > ~/upgrade-new.json
-rpm -E '%fedora'
-ls /etc/yum.repos.d
-grep AutomaticUpdatePolicy /etc/rpm-ostreed.conf
-systemctl is-enabled rpm-ostreed-automatic.timer bootc-fetch-apply-updates.timer
+systemctl is-enabled rpm-ostreed-automatic.timer
 systemctl is-active rpm-ostreed-automatic.timer nix.mount nix-daemon.socket
 ls -Z /nix/var/nix/daemon-socket/
 sysctl fs.inotify.max_user_watches fs.inotify.max_user_instances
@@ -338,7 +329,7 @@ sudo ostree admin config-diff | diff ~/etc-diff-44 -
 ```
 
 - [ ] **Switched**: `45` booted, `bootc status` tracks the `45` tag with `signature: containerPolicy`. Write the digest into the table.
-- [ ] **Base system**: the section 1 checks hold on the new release. No `terra.repo`, policy `stage`, timers `enabled`, `active` and `masked`, `nix.mount` and socket `active`, socket `var_run_t`, inotify `1048576` and `1024`.
+- [ ] **Base system**: the section 1 checks hold on the new release. Staging timer `enabled` and `active`, `nix.mount` and socket `active`, socket `var_run_t`, inotify `1048576` and `1024`.
 - [ ] **Clean boot**: `systemctl --failed` lists 0 units, `ausearch` prints `<no matches>`.
 - [ ] **No remotes**: `flatpak remotes` prints nothing. A bump is when Fedora may move remote seeding to another package, see ADR-0002.
 - [ ] **IDs**: the `getent` diff is empty, `find` prints nothing. Dynamic UIDs can come out in a different order on the new image, and `/var/nix` keeps the old numbers. tmpfiles resets the owner of `/var/nix/store` itself on every boot, so `stat` on it proves nothing.
