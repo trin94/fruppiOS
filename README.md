@@ -258,14 +258,14 @@ just format
 
 ### CI
 
-- Builds on code pushes, pull requests, and daily at 06:00 UTC.
+- Builds on code pushes and daily at 06:00 UTC.
   Markdown-only pushes don't trigger a build.
 - Runs `just test` on every build.
 - On the default branch, if every check passes, pushes the image to GHCR and
   signs it. It then pulls the published image with the image's own signature
   policy.
-- Pull requests and other branches build and test, but don't publish.
-- Runs `just format` on every push and pull request in its own workflow.
+- On other branches, builds and tests but doesn't publish.
+- Runs `just format` on every push in its own workflow.
   A failing lint doesn't stop publishing.
 
 ## Possible additions
