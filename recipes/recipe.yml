@@ -36,6 +36,7 @@ modules:
 
         - brightnessctl
         - ddcutil
+        - git-credential-libsecret
         - gnome-keyring
         - gnome-keyring-pam
         - gvfs
