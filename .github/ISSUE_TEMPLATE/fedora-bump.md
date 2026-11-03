@@ -6,6 +6,17 @@ title: "Bump to Fedora "
 
 Replace `44` and `45` with the old and new release.
 
+## Before
+
+- [ ] Noctalia on `45` isn't older than on `44`. If it is, wait. The bump would downgrade it, and an older Noctalia
+      ignores the newer config. Check only the repos the build uses, mdapi also counts updates-testing:
+
+  ```bash
+  for r in 44 45; do
+      dnf repoquery -q --releasever=$r --disablerepo='*' --enablerepo=fedora,updates --latest-limit=1 noctalia
+  done
+  ```
+
 ## Change
 
 - [ ] `image-version` in `recipes/recipe.yml`.
