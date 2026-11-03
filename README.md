@@ -43,7 +43,7 @@ Your current installation doesn't have the fruppiOS signing key yet, so this
 first switch can't verify the image. The key comes with fruppiOS.
 
 ```bash
-sudo bootc switch ghcr.io/trin94/fruppios:44
+sudo bootc switch ghcr.io/trin94/fruppios:45
 sudo systemctl reboot
 ```
 
@@ -53,12 +53,15 @@ Log in and press **Super+T** to open the Ptyxis terminal. Switch again, this
 time with signature verification. All later updates are verified.
 
 ```bash
-sudo bootc switch --enforce-container-sigpolicy ghcr.io/trin94/fruppios:44
+sudo bootc switch --enforce-container-sigpolicy ghcr.io/trin94/fruppios:45
 sudo systemctl reboot
 ```
 
-Use the `44` tag, not `latest`. `44` stays on Fedora 44 and is rebuilt daily.
+Use the `45` tag, not `latest`. `45` stays on Fedora 45 and is rebuilt daily.
 `latest` moves to the next Fedora release when the recipe does.
+
+Older release tags such as `44` stay published but get no more rebuilds.
+Switch to `45`, see [Fedora releases and signatures](#fedora-releases-and-signatures).
 
 ### 3. Install a browser
 
@@ -226,7 +229,7 @@ CI signs every published image with [cosign](https://github.com/sigstore/cosign)
 To verify an image yourself, use `cosign.pub` from this repository:
 
 ```bash
-cosign verify --key cosign.pub ghcr.io/trin94/fruppios:44
+cosign verify --key cosign.pub ghcr.io/trin94/fruppios:45
 ```
 
 ## Building
@@ -260,6 +263,8 @@ just format
 
 - Builds on code pushes and daily at 06:00 UTC.
   Markdown-only pushes don't trigger a build.
+- Builds only the Fedora release in `image-version`. The previous release's tag
+  stops getting rebuilds at the bump.
 - Runs `just test` on every build.
 - On the default branch, if every check passes, pushes the image to GHCR and
   signs it. It then pulls the published image with the image's own signature

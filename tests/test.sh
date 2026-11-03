@@ -30,7 +30,7 @@ static_lint() {
 
 static_fedora() {
     local ok=0
-    expect "fedora release" 44 "$(in_image rpm -E '%fedora')" || ok=1
+    expect "fedora release" 45 "$(in_image rpm -E '%fedora')" || ok=1
     expect "terra.repo in /etc/yum.repos.d" absent \
         "$(in_image sh -c 'test -e /etc/yum.repos.d/terra.repo && echo present || echo absent')" || ok=1
     return "$ok"
