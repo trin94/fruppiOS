@@ -2,7 +2,7 @@
 
 Two passes, both by hand, each in one sitting.
 
-- **Fresh pass**, sections 1 to 11: a fresh Silverblue 44 VM switches to the image. Run it before the install on your
+- **Fresh pass**, sections 1 to 11: a fresh Silverblue 45 VM switches to the image. Run it before the install on your
   machine and before any change to login, mounts, or updates.
 - **Upgrade pass**, section 13: a VM that already runs the image with a populated user environment moves to the next
   Fedora release. Run it at every major bump, after the new tag passed the fresh pass. The first one comes with the 45
@@ -19,7 +19,7 @@ issue that asked for it, with this table and the four `bootc status` dumps.
 
 Setup:
 
-- Silverblue 44 VM, fresh install, 3D acceleration on.
+- Silverblue 45 VM, fresh install, 3D acceleration on.
 - A disposable USB disk you can attach to the VM.
 - Optional: an SMB share the VM can reach, see section 4.
 - One test account, `nix-test`. The Home Manager fixture expects that name.
@@ -32,14 +32,14 @@ Commands marked **admin** run as the account you created in the Silverblue insta
 **admin**, the same steps the README gives:
 
 ```bash
-sudo bootc switch ghcr.io/trin94/fruppios:44
+sudo bootc switch ghcr.io/trin94/fruppios:45
 sudo systemctl reboot
 ```
 
 After the reboot, **admin**:
 
 ```bash
-sudo bootc switch --enforce-container-sigpolicy ghcr.io/trin94/fruppios:44
+sudo bootc switch --enforce-container-sigpolicy ghcr.io/trin94/fruppios:45
 sudo systemctl reboot
 ```
 
@@ -254,7 +254,7 @@ test "$(cat /proc/sys/kernel/random/boot_id)" = "$(cat ~/boot-id)" && echo same 
 
 **admin**: `sudo systemctl reboot`, then `sudo bootc status --json > ~/booted-b.json`.
 
-- [ ] **Activation**: B booted, `rpm -E '%fedora'` prints `44`.
+- [ ] **Activation**: B booted, `rpm -E '%fedora'` prints `45`.
 - [ ] **Persistence**: `bash ~/check.sh` passes as `nix-test`.
 
 ## 9. Rollback
@@ -271,7 +271,7 @@ The stop doesn't survive the reboot. The timer comes back one hour after boot, l
 
 After the reboot, **admin**: `sudo bootc status --json > ~/rollback-a.json`.
 
-- [ ] **Rollback**: A booted again, `rpm -E '%fedora'` prints `44`.
+- [ ] **Rollback**: A booted again, `rpm -E '%fedora'` prints `45`.
 - [ ] **User env unchanged**: `bash ~/check.sh` passes as `nix-test`.
 
 ## 10. Removed remote

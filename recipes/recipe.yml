@@ -4,7 +4,7 @@ name: fruppios
 description: Minimal Fedora Atomic desktop for one person who also administers the machine.
 
 base-image: quay.io/fedora-ostree-desktops/base-atomic
-image-version: 44
+image-version: 45
 
 modules:
   - type: dnf
@@ -40,7 +40,6 @@ modules:
         - gnome-keyring
         - gnome-keyring-pam
         - gvfs
-        - gvfs-archive # subpackage merged into gvfs in F45, drop at the bump
         - gvfs-fuse
         - gvfs-gphoto2
         - gvfs-mtp
