@@ -30,7 +30,7 @@ jobs:
     steps:
       # BlueBuild leaves every tag in the runner's rootless podman storage
       - name: Build image
-        uses: blue-build/github-action@v1.13
+        uses: blue-build/github-action@v1.14
         with:
           recipe: recipe.yml
           cli_version: v0.9.37
